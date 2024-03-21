@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<!-- <head>
+  <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head> -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js" integrity="sha512-VJ6+sp2E5rFQk05caiXXzQd1wBABpjEj1r5kMiLmGAAgwPItw1YpqsCCBtq8Yr1x6C49/mTpRdXtq8O2RcZhlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+ <body>
+
+<input type="text" id="codeInput" placeholder="Enter a six-digit code">
+  <button onclick="setCode()">Set Code</button>
+  <button onclick="changeCodeAt()">Change Code</button>
+  <input type="number" id="changeIndexInput" placeholder="Index">
+  <input type="number" id="changeDigitInput" placeholder="Digit">
+  <p id="currentCode"></p>
+  <p id="errorMessage"></p>
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="form-group">
+    <label for="pass-visibility">Enter Room Code</label>
+    <div class="password-toggle">
+        
+        <input type="text" id="room_code" value="" class="form-control" placeholder="Enter room code">
+        <input type="text" id="room_code" value="" class="form-control" placeholder="Enter room code">
+        
+    </div>
+    <button class="btn btn-accent mt-2" >Send room code</button>
+    <button class="btn btn-danger mt-2" >Change Room code</button>
+
+</div>
+
+
+
+
+
+  </div>
+  <div class="form-group" style="display:none" id="room_code_div">
+      <label>Room Code</label>
+      <input class="form-control" value="" readonly id="show_room_code">
+      <button class="btn btn-info mt-2 btn-sm" onclick="myFunction()"><i class="czi-add-document"></i> Copy Code
+      </button>
+  </div>
+
+
+
+
+
+
+
+
+  <h1>share your room code here</h1>
+  <input type="number" placeholder="room code" id="roomCode">
+  <button id="setcode">Send</button>
+</div>
+  <div id="messages"></div>
+
+
+
+<form method="post" class="mt-5" enctype="multipart/form-data">
+  <h4 class="text-center">Update Game results</h4>
+  <div class="form-group">
+      <select class="form-control" required id="result" name="result" onchange="showOption()">
+          <option>Choose</option>
+          <option value="WON">Won</option>
+          <option value="LOST">Lost</option>
+          <option value="CANCEL">Game Canceled</option>
+      </select>
+  </div>
+  <div class="form-group" id="won" style="display: none;">
+      <div class="cz-file-drop-area">
+          <div class="cz-file-drop-icon czi-cloud-upload"></div>
+          <span class="cz-file-drop-message">Drag and drop here to upload</span>
+          <input type="file" name="upload_file" multiple class="cz-file-drop-input">
+          <button type="button" class="cz-file-drop-btn btn btn-primary btn-sm">Or select file</button>
+        </div>
+  </div>
+
+
+  <div class="form-group" id="cancel" style="display: none;">
+      <label for="cancel">Game cancel reason</label>
+      <textarea class="form-control" name="reason_of_cancel" ></textarea>
+
+  </div>
+
+
+
+
+  <button class="btn btn-accent" type="submit">Submit Result <i class="czi-loudspeaker ml-3"></i></button>
+
+</form>
+
+
+
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const roomCode =document.getElementById('roomCode');
+      const setcode =document.getElementById('setcode');
+
+    const allmessages=document.getElementById("messages");
+
+
+
+
+    socket.on('welcome',(s)=>{
+      console.log(s)
+    })
+
+socket.on('connectedRoom', function(data){
+  // document.body.innerHTML="";
+  // document.appendChild(data);
+  console.log(data)
+})
+
+
+
+
+socket.on('message',(message)=>{
+  // console.log(message)
+  const p=document.createElement('p')
+  p.innerHTML="room code is : "+message;
+  console.log( `room code is: ${p}`)
+  allmessages.appendChild(p);
+});
+      setcode.addEventListener('click', (e)=>{
+        const message = roomCode.value;
+        console.log(message);
+        socket.emit('user-code', message)
+        // sendMessage(e.target.value)
+      });
+
+
+      function setCode() {
+      const code = document.getElementById('codeInput').value;
+      socket.emit('setCode', code);
+    }
+
+    function changeCodeAt() {
+      const index = document.getElementById('changeIndexInput').value;
+      const digit = document.getElementById('changeDigitInput').value;
+      socket.emit('changeCodeAt', { index, digit });
+    }
+
+    socket.on('codeUpdated', (data) => {
+      console.log('Code updated:', data.currentCode);
+      document.getElementById('currentCode').innerText = `Current code: ${data.currentCode}`;
+    });
+
+    socket.on('error', (data) => {
+      console.error('Error:', data.message);
+      document.getElementById('errorMessage').innerText = data.message;
+    });
+
+
+
+
+
+// return()=>{
+//   socket.disconnect();
+// }
+  </script>
+</body>
+
+
+
+</html>
